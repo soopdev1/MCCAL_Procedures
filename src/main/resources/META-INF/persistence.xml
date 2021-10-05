@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+  <persistence-unit name="microcredito" transaction-type="RESOURCE_LOCAL">
+
+    <class>it.refill.entities.Allievi</class>
+    <class>it.refill.entities.Allievi_Pregresso</class>
+    <class>it.refill.entities.CPI</class>
+    <class>it.refill.entities.Comuni</class>
+    <class>it.refill.entities.ComuniCoord</class>
+    <class>it.refill.entities.Condizione_Mercato</class>
+    <class>it.refill.entities.Docenti</class>
+    <class>it.refill.entities.FasceDocenti</class>
+    <class>it.refill.entities.Path</class>
+    <class>it.refill.entities.ProgettiFormativi</class>
+    <class>it.refill.entities.SediFormazione</class>
+    <class>it.refill.entities.Selfiemployment_Prestiti</class>
+    <class>it.refill.entities.SoggettiAttuatori</class>
+    <class>it.refill.entities.StatiPrg</class>
+    <class>it.refill.entities.StatoPartecipazione</class>
+    <class>it.refill.entities.TitoliStudio</class>
+    <class>it.refill.entities.Tracking</class>
+    <class>it.refill.entities.User</class>
+    <exclude-unlisted-classes>false</exclude-unlisted-classes>
+    <properties>
+      <property name="eclipselink.logging.level" value="OFF"/>
+      <property name="javax.persistence.schema-generation.database.action" value="validate"/>
+      <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
+      <property name="javax.persistence.jdbc.user" value="admin"/>
+      <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
+      <property name="javax.persistence.jdbc.password" value="Xray8888$$!"/>
+      <!-- MC -->
+      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://clustermicrocredito.cluster-c6m6yfqeypv3.eu-south-1.rds.amazonaws.com:3306/microcredito?useSSL=false"/>
+      <!-- PROFESSIONI
+           <property name="javax.persistence.jdbc.url" value="jdbc:mysql://clustermicrocredito.cluster-c6m6yfqeypv3.eu-south-1.rds.amazonaws.com:3306/professioni?autoReconnect=true&amp;useSSL=false"/>
+            -->
+    </properties>
+  </persistence-unit>
+</persistence>
