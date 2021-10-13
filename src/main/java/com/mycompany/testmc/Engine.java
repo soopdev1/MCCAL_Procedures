@@ -142,40 +142,54 @@ public class Engine {
                 .collect(Collectors.toList());
         return outWithoutDuplicates;
     }
-    
-    
-    public static void sms_primogiorno(){
-        
+
+    public static void sms_primogiorno(boolean professioni) {
+        try {
+            Database db0 = new Database(professioni);
+            String sql0 = "SELECT MIN(f.data),p.idprogetti_formativi,CURDATE() FROM fad_calendar f, progetti_formativi p "
+                    + "WHERE p.idprogetti_formativi=f.idprogetti_formativi AND p.stato='FA' "
+                    + "GROUP BY f.idprogetti_formativi";
+            try (Statement st0 = db0.getC().createStatement(); ResultSet rs0 = st0.executeQuery(sql0)) {
+                while (rs0.next()) {
+                    String data = rs0.getString(1);
+                    String oggi = rs0.getString(3);
+                    if (data.equals(oggi)) {
+                        int idpr = rs0.getInt(2);
+                        
+                        
+                        
+                    }
+                }
+            }
+            db0.closeDB();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
     }
-    
-    
+
     public static void main(String[] args) {
 
-        String pro;
-        boolean print = true;
-        String id;
-        try {
-            id = args[0];
-            pro = args[1];
-        } catch (Exception e) {
-            id = null;
-            pro = "false";
-        }
+////        String pro;
+        boolean print = false;
+        boolean professioni = false;
+////        String id;
+////        try {
+////            id = args[0];
+////            pro = args[1];
+////        } catch (Exception e) {
+////            id = null;
+////            pro = "false";
+////        }
 
-        boolean professioni = (pro == null) || (pro.equals("true"));
+//        boolean professioni = (pro == null) || (pro.equals("true"));
 
-        
-        
-        
-        
-        
-        
         List<String> out = elenco_progetti(professioni);
 
-        if (id != null) {
-            out.clear();
-            out.add(id);
-        }
+//        if (id != null) {
+//            out.clear();
+//            out.add(id);
+//        }
 
         out.forEach(idpr -> {
             File report_temp = generatereportFAD_multistanza(idpr, print, professioni);
