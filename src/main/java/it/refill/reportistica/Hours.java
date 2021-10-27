@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.mycompany.testmc;
+package it.refill.reportistica;
 
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.poi.xssf.usermodel.XSSFColor;

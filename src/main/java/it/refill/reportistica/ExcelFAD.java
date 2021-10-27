@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.mycompany.testmc;
+package it.refill.reportistica;
 
 import com.google.common.base.Splitter;
-import static com.mycompany.testmc.Engine.createDir;
+import static it.refill.engine.Engine.createDir;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

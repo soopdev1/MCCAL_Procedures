@@ -28,14 +28,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.io.FileUtils;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -257,7 +262,110 @@ public class ExcelExtraction {
 //
 //        return false;
 //    }
-    public static void elencoAllievi() {
+    public static void elencoDocenti_R() {
+        Entity e = new Entity();
+        try {
+
+            List<Docenti> docenti = e.getDocenti();
+
+            try (XSSFWorkbook wb = new XSSFWorkbook()) {
+                XSSFSheet sh1 = wb.createSheet();
+
+                XSSFColor color = new XSSFColor(new java.awt.Color(43, 150, 150), null);
+                XSSFCellStyle cellStyleintest = wb.createCellStyle();
+                cellStyleintest.setBorderBottom(BorderStyle.THIN);
+                cellStyleintest.setBorderTop(BorderStyle.THIN);
+                cellStyleintest.setBorderRight(BorderStyle.THIN);
+                cellStyleintest.setBorderLeft(BorderStyle.THIN);
+                cellStyleintest.setFillForegroundColor(color);
+                cellStyleintest.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+                cellStyleintest.setAlignment(HorizontalAlignment.CENTER);
+
+                XSSFCellStyle cellStylenorm = wb.createCellStyle();
+                cellStylenorm.setBorderBottom(BorderStyle.THIN);
+                cellStylenorm.setBorderTop(BorderStyle.THIN);
+                cellStylenorm.setBorderRight(BorderStyle.THIN);
+                cellStylenorm.setBorderLeft(BorderStyle.THIN);
+
+                XSSFRow intestazione = getRow(sh1, 0);
+
+                for (int ind = 0; ind < 6; ind++) {
+                    XSSFCell ce1 = getCell(intestazione, ind);
+                    ce1.setCellStyle(cellStyleintest);
+                    switch (ind) {
+                        case 0:
+                            setCell(ce1, "ID");
+                            break;
+                        case 1:
+                            setCell(ce1, "COGNOME");
+                            break;
+                        case 2:
+                            setCell(ce1, "NOME");
+                            break;
+                        case 3:
+                            setCell(ce1, "CODICE FISCALE");
+                            break;
+                        case 4:
+                            setCell(ce1, "DATA DI NASCITA");
+                            break;
+                        case 5:
+                            setCell(ce1, "FASCIA");
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                AtomicInteger indice = new AtomicInteger(1);
+
+                docenti.forEach(d1 -> {
+                    XSSFRow rowcontent = getRow(sh1, indice.get());
+
+                    indice.addAndGet(1);
+                    for (int ind = 0; ind < 6; ind++) {
+                        XSSFCell ce1 = getCell(rowcontent, ind);
+                        ce1.setCellStyle(cellStylenorm);
+                        switch (ind) {
+                            case 0:
+                                setCell(ce1, String.valueOf(d1.getId()));
+                                break;
+                            case 1:
+                                setCell(ce1, d1.getCognome().toUpperCase());
+                                break;
+                            case 2:
+                                setCell(ce1, d1.getNome().toUpperCase());
+                                break;
+                            case 3:
+                                setCell(ce1, d1.getCodicefiscale().toUpperCase());
+                                break;
+                            case 4:
+                                setCell(ce1, sdita.format(d1.getDatanascita()));
+                                break;
+                            case 5:
+                                setCell(ce1, d1.getFascia().getDescrizione().toUpperCase());
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                });
+                for (int i = 0; i < 6; i++) {
+                    sh1.autoSizeColumn(i);
+                }
+                String fileout = e.getPath("estrazione_docenti");
+                try (FileOutputStream outputStream = new FileOutputStream(new File(fileout))) {
+                    wb.write(outputStream);
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            e.insertTracking(null, "BATCH elencoDocenti: " + ex.getMessage());
+        } finally {
+            e.close();
+        }
+    }
+
+    public static void elencoAllievi_R() {
         Entity e = new Entity();
         try {
             // in formazione
@@ -268,6 +376,7 @@ public class ExcelExtraction {
 
             List<Excel_allievi> complete = new LinkedList<>();
             List<Allievi> allievi = e.findAll(Allievi.class);
+
             List<Allievi_Pregresso> allievi_pregresso = e.findAll(Allievi_Pregresso.class);
             HashedMap<String, SoggettiAttuatori> soggetto_map = e.getSoggettiMap();
 
@@ -284,16 +393,22 @@ public class ExcelExtraction {
                     a2.setDATAINIZIOPERCORSOFORMATIVO("-");
                     a2.setDATAFINEPERCORSOFORMATIVO("-");
                 } else {
-                    if (statiavvio.contains(a1.getProgetto().getStato().getId())) {
-                        a2.setSTATO("IN FORMAZIONE");
-                        a2.setOrdine(1);
-                    } else if (staticoncluso.contains(a1.getProgetto().getStato().getId())) {
-                        a2.setSTATO("FORMATO");
-                        a2.setOrdine(2);
+                    if (a1.getStatopartecipazione().getId().equals("01")) {
+                        if (statiavvio.contains(a1.getProgetto().getStato().getId())) {
+                            a2.setSTATO("IN FORMAZIONE");
+                            a2.setOrdine(1);
+                        } else if (staticoncluso.contains(a1.getProgetto().getStato().getId())) {
+                            a2.setSTATO("FORMATO");
+                            a2.setOrdine(2);
+                        } else {
+                            a2.setSTATO("IN FORMAZIONE");
+                            a2.setOrdine(1);
+                        }
                     } else {
-                        a2.setSTATO("IN FORMAZIONE");
-                        a2.setOrdine(1);
+                        a2.setSTATO("RITIRATO");
+                        a2.setOrdine(3);
                     }
+
                     a2.setIDPROGETTOFORMATIVO(String.valueOf(a1.getProgetto().getId()));
                     a2.setCIPPROGETTOFORMATIVO(a1.getProgetto().getCip() == null ? "-" : a1.getProgetto().getCip());
                     a2.setDATAINIZIOPERCORSOFORMATIVO(

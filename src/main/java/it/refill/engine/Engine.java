@@ -3,9 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.mycompany.testmc;
+package it.refill.engine;
 
-import static com.mycompany.testmc.ExcelFAD.generatereportFAD_multistanza;
+import it.refill.reportistica.Database;
+import static it.refill.reportistica.ExcelFAD.generatereportFAD_multistanza;
+import it.refill.reportistica.Report;
+import it.refill.reportistica.Sms;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -117,7 +120,7 @@ public class Engine {
         }
     }
 
-    private static List<String> elenco_progetti(boolean professioni) {
+    public static List<String> elenco_progetti(boolean professioni) {
         List<String> out = new ArrayList<>();
         try {
             Database db2 = new Database(professioni);
@@ -146,18 +149,31 @@ public class Engine {
     public static void sms_primogiorno(boolean professioni) {
         try {
             Database db0 = new Database(professioni);
-            String sql0 = "SELECT MIN(f.data),p.idprogetti_formativi,CURDATE() FROM fad_calendar f, progetti_formativi p "
+            String sql0 = "SELECT MIN(f.data),p.idprogetti_formativi,CURDATE(),f.orainizio,f.orafine FROM fad_calendar f, progetti_formativi p "
                     + "WHERE p.idprogetti_formativi=f.idprogetti_formativi AND p.stato='FA' "
                     + "GROUP BY f.idprogetti_formativi";
             try (Statement st0 = db0.getC().createStatement(); ResultSet rs0 = st0.executeQuery(sql0)) {
                 while (rs0.next()) {
-                    String data = rs0.getString(1);
+                    String datalezione1 = rs0.getString(1);
                     String oggi = rs0.getString(3);
-                    if (data.equals(oggi)) {
+                    if (datalezione1.equals(oggi)) {
                         int idpr = rs0.getInt(2);
-                        
-                        
-                        
+                        String orainizio = rs0.getString("f.orainizio");
+                        String orafine = rs0.getString("f.orafine");
+                        String sql1 = "SELECT a.idallievi,a.nome,a.telefono FROM allievi a WHERE a.id_statopartecipazione='01' AND a.idprogetti_formativi=" + idpr;
+                        try (Statement st1 = db0.getC().createStatement(); ResultSet rs1 = st1.executeQuery(sql1)) {
+                            if (rs1.next()) {
+                                String nome = rs1.getString("nome").toUpperCase();
+                                String telefono = rs1.getString("telefono").toUpperCase();
+                                String msg = "Ciao " + nome + " ti ricordiamo che oggi ci sarà la prima lezione del tuo PF, dalle " + orainizio + " alle " + orafine + ". Controlla la tua mail.";
+                                boolean es = Sms.sendSMS2021(telefono, msg, db0);
+                                if (es) {
+                                    System.out.println("SMS INVIATO AD ID " + idpr);
+                                } else {
+                                    System.out.println("KO SMS INVIATO AD ID " + idpr);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -183,14 +199,12 @@ public class Engine {
 ////        }
 
 //        boolean professioni = (pro == null) || (pro.equals("true"));
-
         List<String> out = elenco_progetti(professioni);
 
 //        if (id != null) {
 //            out.clear();
 //            out.add(id);
 //        }
-
         out.forEach(idpr -> {
             File report_temp = generatereportFAD_multistanza(idpr, print, professioni);
             if (report_temp != null) {
@@ -231,48 +245,6 @@ public class Engine {
 //        }
 //////        //////////////////////////////////////////////////////////////////////
 //        updatefilesEX(idpr, new File(startpath + "Progetto_3_report_CFAD_CANTIERI.xlsx"), professioni);
-    }
-
-}
-
-class Report {
-
-    int idpr;
-    boolean update;
-    String base64;
-
-    public Report(int idpr, String base64) {
-        this.idpr = idpr;
-        this.base64 = base64;
-    }
-
-    public Report(int idpr, boolean update) {
-        this.idpr = idpr;
-        this.update = update;
-    }
-
-    public boolean isUpdate() {
-        return update;
-    }
-
-    public void setUpdate(boolean update) {
-        this.update = update;
-    }
-
-    public int getIdpr() {
-        return idpr;
-    }
-
-    public void setIdpr(int idpr) {
-        this.idpr = idpr;
-    }
-
-    public String getBase64() {
-        return base64;
-    }
-
-    public void setBase64(String base64) {
-        this.base64 = base64;
     }
 
 }

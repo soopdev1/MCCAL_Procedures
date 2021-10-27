@@ -5,7 +5,7 @@
  */
 package test;
 
-import com.mycompany.testmc.Database;
+import it.refill.reportistica.Database;
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.codec.binary.Base64;

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.mycompany.testmc;
+package it.refill.reportistica;
 
 import com.google.gson.Gson;
 import java.sql.Connection;

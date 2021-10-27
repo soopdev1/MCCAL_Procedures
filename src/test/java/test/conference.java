@@ -5,7 +5,7 @@
  */
 package test;
 
-import com.mycompany.testmc.Database;
+import it.refill.reportistica.Database;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
