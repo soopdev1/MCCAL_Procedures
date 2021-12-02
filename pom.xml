@@ -124,7 +124,7 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        it.refill.engine.CreateReport
+                                        it.refill.engine.Engine
                                     </mainClass>
                                 </manifest>
                             </archive>

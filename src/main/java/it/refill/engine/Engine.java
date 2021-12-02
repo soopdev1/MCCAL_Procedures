@@ -28,10 +28,16 @@ import org.apache.commons.io.FileUtils;
  */
 public class Engine {
 
-    private static void manage(int idpr, boolean professioni) {
+    public static void manage(int idpr, boolean professioni) {
         try {
             Database db2 = new Database(professioni);
             switch (idpr) {
+                case 16:
+                    if (professioni) {
+                        db2.getC().createStatement().executeUpdate("UPDATE fad_track f SET ACTION = REPLACE(ACTION,'-- GIACOMO DEROSE','-- GIACOMO DE ROSE') "
+                                + "WHERE f.room LIKE '%PR_16%' AND action LIKE'%-- GIACOMO DEROSE'");
+                    }
+                    break;
                 case 20:
                     db2.getC().createStatement().executeUpdate("UPDATE fad_track f SET ACTION = REPLACE(ACTION,'-- Alessia michienzi','-- CATERINA MICHIENZI') "
                             + "WHERE f.room = 'FAD_20_1' AND action LIKE'%-- Alessia michienzi'");
@@ -67,9 +73,14 @@ public class Engine {
                             + "WHERE f.room LIKE 'FAD_38%' AND action LIKE '%connessione'");
                     break;
                 case 44:
-                    String sql = "UPDATE fad_track f SET ACTION = REPLACE(ACTION,'Solymar Camasca','ELSA SOLYMAR CAMASCA PACHECO') "
-                            + "WHERE f.room LIKE 'FAD_44%' AND action LIKE '%Solymar Camasca'";
-                    db2.getC().createStatement().executeUpdate(sql);
+                    db2.getC().createStatement().executeUpdate("UPDATE fad_track f SET ACTION = REPLACE(ACTION,'Solymar Camasca','ELSA SOLYMAR CAMASCA PACHECO') "
+                            + "WHERE f.room LIKE 'FAD_44%' AND action LIKE '%Solymar Camasca'");
+                    break;
+                case 71:
+                    db2.getC().createStatement().executeUpdate("UPDATE fad_track f SET ACTION = REPLACE(ACTION,'PEPE EVARISTO FRANCESCO PIO','EVARISTO FRANCESCO PIO PEPE') "
+                            + "WHERE f.room LIKE 'FAD_71%' AND action LIKE '%PEPE EVARISTO FRANCESCO PIO'");
+                    break;
+
                 default:
                     break;
             }
@@ -124,15 +135,18 @@ public class Engine {
         List<String> out = new ArrayList<>();
         try {
             Database db2 = new Database(professioni);
-            String sql = "SELECT DISTINCT(room) FROM fad_track f WHERE TIMESTAMP LIKE CONCAT(DATE_SUB(CURDATE(),INTERVAL 1 DAY),'%')";
+//            String sql = "SELECT DISTINCT(room) FROM fad_track f WHERE TIMESTAMP LIKE CONCAT(DATE_SUB(CURDATE(),INTERVAL 1 DAY),'%')";
+            String sql = "SELECT f.idprogetti_formativi FROM fad_calendar f WHERE f.data = DATE_SUB(CURDATE(),INTERVAL 1 DAY)";
 
             try (Statement st = db2.getC().createStatement(); ResultSet rs = st.executeQuery(sql)) {
                 while (rs.next()) {
-                    String room = rs.getString(1);
-                    if (room.contains("_")) {
-                        String pf = room.split("_")[1];
-                        out.add(pf);
-                    }
+                    out.add(rs.getString(1));
+
+//                    String room = rs.getString(1);
+//                    if (room.contains("_")) {
+//                        String pf = room.split("_")[1];
+//                        out.add(pf);
+//                    }
                 }
             }
 
@@ -186,25 +200,26 @@ public class Engine {
 
     public static void main(String[] args) {
 
-////        String pro;
+//        String pro;
         boolean print = false;
         boolean professioni = false;
-////        String id;
-////        try {
-////            id = args[0];
-////            pro = args[1];
-////        } catch (Exception e) {
-////            id = null;
-////            pro = "false";
-////        }
+//        String id;
+//        try {
+//            id = args[0];
+//            pro = args[1];
+//        } catch (Exception e) {
+//            id = null;
+//            pro = "false";
+//        }
 
 //        boolean professioni = (pro == null) || (pro.equals("true"));
         List<String> out = elenco_progetti(professioni);
-
+//
 //        if (id != null) {
 //            out.clear();
 //            out.add(id);
 //        }
+
         out.forEach(idpr -> {
             File report_temp = generatereportFAD_multistanza(idpr, print, professioni);
             if (report_temp != null) {

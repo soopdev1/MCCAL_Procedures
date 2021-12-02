@@ -13,6 +13,9 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -341,10 +344,25 @@ public class ExcelFAD {
     public static final String timestampSQL = "yyyy-MM-dd HH:mm:ss";
     public static final DateTimeFormatter dtfad = DateTimeFormat.forPattern(timestampFAD);
 
+//    public static String convertTS_Italy(String ts1) {
+//        TimeZone tz1 = TimeZone.getTimeZone("Europe/Berlin");
+//        TimeZone tz2 = TimeZone.getTimeZone("GMT");
+//        long timeDifference = tz1.getRawOffset() - tz2.getRawOffset() + tz1.getDSTSavings() - tz2.getDSTSavings();
+//        String dt1 = StringUtils.substring(ts1, 0, 26);
+//        try {
+//            if (dt1.length() != timestampFAD.length()) {
+//                if (dt1.length() == 19) {
+//                    dt1 += ".000000";
+//                }
+//            }
+//        } catch (Exception e) {
+//
+//        }
+//        DateTime start = new DateTime(dtfad.parseDateTime(dt1));
+//        DateTime dateTimeIT = start.plus(timeDifference);
+//        return dateTimeIT.toString(timestampSQL);
+//    }
     public static String convertTS_Italy(String ts1) {
-        TimeZone tz1 = TimeZone.getTimeZone("Europe/Berlin");
-        TimeZone tz2 = TimeZone.getTimeZone("GMT");
-        long timeDifference = tz1.getRawOffset() - tz2.getRawOffset() + tz1.getDSTSavings() - tz2.getDSTSavings();
         String dt1 = StringUtils.substring(ts1, 0, 26);
         try {
             if (dt1.length() != timestampFAD.length()) {
@@ -353,304 +371,29 @@ public class ExcelFAD {
                 }
             }
         } catch (Exception e) {
-
         }
         DateTime start = new DateTime(dtfad.parseDateTime(dt1));
-        DateTime dateTimeIT = start.plus(timeDifference);
+        DateTime dateTimeIT = start.plus(getTimeDiff(start));
         return dateTimeIT.toString(timestampSQL);
     }
 
-//    private static String convertTS_Italy(Timestamp ts1) {
-//        LocalDateTime ldt = ts1.toLocalDateTime();
-//        Date d1 = Date.from(ldt.atZone(ZoneOffset.UTC).toInstant());
-//        if(ts1.toString().startsWith("2021-07-12")){
-//            System.out.println("com.mycompany.testmc.ExcelFAD.convertTS_Italy(ING) " + ts1.toString());
-//            System.out.println("com.mycompany.testmc.ExcelFAD.convertTS_Italy(USC) " + sd0.format(d1));
-//        }
-//        return sd0.format(d1);
-//    }
-//    public static void main(String[] args) {
-//        generateDocenti();
-//    }
-//    public static String generateDocenti() {
-//
-//        try {
-//            List<Track> tracking = new ArrayList<>();
-//            List<Items> idutenti = new ArrayList<>();
-//            List<Presenti> presenti = new ArrayList<>();
-//            String day = "2020-11-26";
-//            String sql0 = "SELECT * FROM fad_track f where f.room ='26NOVEMBREORE9.30ACCREDITAMENTODOCENTIYESISTARTUPCALABRIA' AND date like '" + day + "%'";
-////            System.out.println("com.mycompany.testmc.ExcelFAD.generateDocenti() "+sql0);
-//            Database db0 = new Database();
-//            String pathtemp = db0.getPathtemp("pathTemp");
-//            List<String> partecipanti = db0.getMailFromConference("15");
-//            Statement st0 = db0.getC().createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
-//            ResultSet rs0 = st0.executeQuery(sql0);
-//            while (rs0.next()) {
-//
-//                String tipoazione = rs0.getString(2);
-//                String azione = rs0.getString(4).toUpperCase().replaceAll(":", ";");
-//                String date = convertTS_Italy(rs0.getTimestamp(5));
-//                if (azione.contains("MESSAGGIO ->")) {
-//                    continue;
-//                }
-//
-//                if (tipoazione.equals("L4")) {
-//                    try {
-//                        String idfad = StringUtils.remove(azione, "USCITA PARTECIPANTE -> ").trim();
-//                        String nomecogn = idutenti.stream().filter(ut -> ut.getId().equals(idfad)).findFirst().get().getDescr().toUpperCase();
-//                        azione = "Logout -> " + nomecogn;
-//                        Track t1 = new Track("", tipoazione, azione, date, day);
-//                        tracking.add(t1);
-//                    } catch (NoSuchElementException ex) {
-//                    }
-//                }
-//                if (tipoazione.equals("IN")) {
-//                    if (azione.startsWith("UTENTE LOGGATO CON ID")) {
-//                        String idfad = StringUtils.remove(azione.split("--")[0], "UTENTE LOGGATO CON ID").trim();
-//                        if (azione.split("--").length > 1) {
-//                            String nomecogn = azione.split("--")[1].trim().toUpperCase();
-//                            idutenti.add(new Items(idfad, nomecogn));
-//                        }
-//                        continue;
-//                    } else if (azione.startsWith("PARTECIPANTI") || azione.startsWith("NOME CAMBIATO")) {
-//                        continue;
-//                    } else if (azione.startsWith("NUOVO PARTECIPANTE")) {
-//                        String nomecogn = azione.split("--")[1].trim().toUpperCase();
-//                        if (!nomecogn.contains("UNDEFINED")) {
-//                            String idfad = StringUtils.remove(azione.split("--")[0], "NUOVO PARTECIPANTE ->").trim();
-//                            idutenti.add(new Items(idfad, nomecogn));
-//                            Track t1 = new Track("", "L1", "Login -> " + nomecogn, date, day);
-//                            tracking.add(t1);
-//                        }
-//                        continue;
-//                    }
-//                }
-//                tracking.add(new Track("", tipoazione, azione, date, day));
-//
-//            }
-//            rs0.close();
-//            st0.close();
-//            db0.closeDB();
-//
-//            List<Track> finaltr = tracking.stream().distinct().collect(Collectors.toList());
-//
-//            finaltr.forEach(tr1 -> {
-//
-//                boolean content = partecipanti.stream().anyMatch(al -> tr1.getDescr().contains(al));
-////                                        if (tr1.getDescr().contains("MIRIAM") && tr1.getDate().contains("2020-11-25")) {
-////                                            System.out.println(content + " fase2 " + tr1.toString());
-////                                        }
-//                if (content) {
-//                    String a = partecipanti.stream().filter(al -> tr1.getDescr().contains(al)).findAny().get();
-//                    Presenti pr1 = new Presenti(a, a, a);
-//
-////                                            System.out.println("N) "+pr1.toString());
-//                    if (tr1.getDescr().contains("Login")) {
-//                        pr1.setLogin(true);
-//                    } else if (tr1.getDescr().contains("Logout")) {
-//                        pr1.setLogout(true);
-//                    }
-//                    pr1.setDate(tr1.getDate());
-//
-//                    presenti.add(pr1);
-////                                            if (tr1.getDescr().contains("MIRIAM") && tr1.getDate().contains("2020-11-25")) {
-////                                                System.out.println("fase3) " + pr1.toString());
-////                                            }
-//                }
-//            });
-//            List<Hours> times_A = new ArrayList<>();
-//            List<String> dist_cf = presenti.stream().map(cf -> cf.getCf()).distinct().collect(Collectors.toList());
-//            dist_cf.forEach(tr1 -> {
-//                Presenti selected = presenti.stream().filter(cf -> cf.getCf().equals(tr1)).findFirst().get();
-//                List<Presenti> userp = presenti.stream().filter(d -> d.getCf().equals(tr1)).distinct().collect(Collectors.toList());
-//                List<Presenti> login = userp.stream().filter(d -> d.isLogin()).distinct().collect(Collectors.toList());
-//                List<Presenti> logout = userp.stream().filter(d -> d.isLogout()).distinct().collect(Collectors.toList());
-//                if (!login.isEmpty() && !logout.isEmpty()) {
-//                    StringBuilder loginvalue = new StringBuilder();
-//                    StringBuilder logoutvalue = new StringBuilder();
-//                    LinkedList<Presenti> userp_final = new LinkedList<>();
-//                    AtomicInteger ind = new AtomicInteger(0);
-//                    userp.forEach(ba1 -> {
-//                        if (ind.get() == 0) {
-//                            if (ba1.isLogin()) {
-//                                userp_final.add(ba1);
-//                            }
-//                        } else {
-//                            if (userp_final.isEmpty()) {
-//                                userp_final.add(ba1);
-//                            } else {
-//                                Presenti precedente = userp_final.getLast();
-//                                if (precedente.isLogin() && !ba1.isLogin()) {
-//                                    if (!precedente.getDate().equals(ba1.getDate())) {
-//                                        userp_final.add(ba1);
-//                                    }
-//                                } else if (precedente.isLogout() && !ba1.isLogout()) {
-//                                    if (!precedente.getDate().equals(ba1.getDate())) {
-//                                        userp_final.add(ba1);
-//                                    }
-//                                } else if (precedente.isLogout() && ba1.isLogout()) {
-//                                    userp_final.removeLast();
-//                                    userp_final.add(ba1);
-//                                }
-//                            }
-//                        }
-//                        ind.addAndGet(1);
-//                    });
-//
-//                    if ((userp_final.size() % 2) != 0) {
-//                        userp_final.removeLast();
-//                    }
-//
-//                    if (!userp_final.isEmpty()) {
-//
-//                        AtomicLong millis = new AtomicLong(0);
-//                        userp_final.forEach(ba1 -> {
-////                                                    System.out.println("S2) " + ba1.toString());
-//                            if (ba1.isLogin()) {
-//                                millis.addAndGet(-format(ba1.getDate().split("\\.")[0], pattern0).getMillis());
-//                                loginvalue.append(ba1.getDate().split(" ")[1].split("\\.")[0]).append("\n");
-//                            } else if (ba1.isLogout()) {
-//                                millis.addAndGet(format(ba1.getDate().split("\\.")[0], pattern0).getMillis());
-//                                logoutvalue.append(ba1.getDate().split(" ")[1].split("\\.")[0]).append("\n");
-//                            }
-//                        });
-//
-//                        XSSFColor c1 = col1;
-//                        long duratalogin = arrotonda(millis.get());
-//
-//                        String duratacollegamento = calcoladurata(duratalogin);
-//                        Hours time = new Hours(day, selected.getNome().toUpperCase(), selected.getCognome().toUpperCase(), tr1,
-//                                loginvalue.toString().trim(),
-//                                logoutvalue.toString().trim(),
-//                                duratacollegamento, c1);
-//                        times_A.add(time);
-//                    }
-//                }
-//            });
-//            XSSFWorkbook workbook = new XSSFWorkbook();
-//            XSSFFont headerFont = workbook.createFont();
-//            headerFont.setBold(true);
-//            headerFont.setFontHeightInPoints((short) 15);
-//            XSSFCellStyle headerCellStyle = workbook.createCellStyle();
-//            headerCellStyle.setFont(headerFont);
-//            headerCellStyle.setBorderBottom(BorderStyle.THIN);
-//            headerCellStyle.setBottomBorderColor(IndexedColors.BLACK.getIndex());
-//            headerCellStyle.setBorderLeft(BorderStyle.THIN);
-//            headerCellStyle.setLeftBorderColor(IndexedColors.BLACK.getIndex());
-//            headerCellStyle.setBorderRight(BorderStyle.THIN);
-//            headerCellStyle.setRightBorderColor(IndexedColors.BLACK.getIndex());
-//            headerCellStyle.setBorderTop(BorderStyle.THIN);
-//            headerCellStyle.setTopBorderColor(IndexedColors.BLACK.getIndex());
-//            headerCellStyle.setFillForegroundColor(col3);
-//            headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-//            XSSFFont normFont = workbook.createFont();
-//            normFont.setFontHeightInPoints((short) 12);
-//            XSSFSheet sheet = workbook.createSheet("FAD Report - Stanza 26 novembre ore 9.30  ACCREDITAMENTO DOCENTI YES I START UP CALABRIA");
-//            XSSFRow row = get(sheet, 0);
-//            XSSFCell cell1 = get(row, 1);
-//            cell1.setCellValue("FAD");
-//            cell1.setCellStyle(headerCellStyle);
-//            sheet.addMergedRegion(new CellRangeAddress(0, 0, 1, 3));
-//            XSSFCell cell3 = get(row, 4);
-//            cell3.setCellValue("Accreditamento docenti");
-//            cell3.setCellStyle(headerCellStyle);
-//            sheet.addMergedRegion(new CellRangeAddress(0, 0, 4, 7));
-//
-//            AtomicInteger in = new AtomicInteger(2);
-//            if (!times_A.isEmpty()) {
-//                XSSFRow row_f = get(sheet, in.get());
-//                XSSFCell cell_f = get(row_f, 1);
-//                cell_f.setCellValue("FASE A");
-//                headerCellStyle.setAlignment(HorizontalAlignment.CENTER);
-//                cell_f.setCellStyle(headerCellStyle);
-//                sheet.addMergedRegion(new CellRangeAddress(in.get(), in.get(), 1, 7));
-//                in.addAndGet(1);
-//                row = get(sheet, in.get());
-//                cell1 = get(row, 1);
-//                cell1.setCellValue("Data");
-//                cell1.setCellStyle(headerCellStyle);
-//                XSSFCell cell2 = get(row, 2);
-//                cell2.setCellValue("Nome");
-//                cell2.setCellStyle(headerCellStyle);
-//                cell3 = get(row, 3);
-//                cell3.setCellValue("Cognome");
-//                cell3.setCellStyle(headerCellStyle);
-//                XSSFCell cell4 = get(row, 4);
-//                cell4.setCellValue("Codice Fiscale");
-//                cell4.setCellStyle(headerCellStyle);
-//                XSSFCell cell5 = get(row, 5);
-//                cell5.setCellValue("Orari Login");
-//                cell5.setCellStyle(headerCellStyle);
-//                XSSFCell cell6 = get(row, 6);
-//                cell6.setCellValue("Orari Logout");
-//                cell6.setCellStyle(headerCellStyle);
-//                XSSFCell cell7 = get(row, 7);
-//                cell7.setCellValue("Totale Ore");
-//                cell7.setCellStyle(headerCellStyle);
-//                in.addAndGet(1);
-//                times_A.forEach(exc -> {
-//                    XSSFCellStyle normCellStyle = workbook.createCellStyle();
-//                    normCellStyle.setBorderBottom(BorderStyle.THIN);
-//                    normCellStyle.setBottomBorderColor(IndexedColors.BLACK.getIndex());
-//                    normCellStyle.setBorderLeft(BorderStyle.THIN);
-//                    normCellStyle.setLeftBorderColor(IndexedColors.BLACK.getIndex());
-//                    normCellStyle.setBorderRight(BorderStyle.THIN);
-//                    normCellStyle.setRightBorderColor(IndexedColors.BLACK.getIndex());
-//                    normCellStyle.setBorderTop(BorderStyle.THIN);
-//                    normCellStyle.setTopBorderColor(IndexedColors.BLACK.getIndex());
-//                    normCellStyle.setWrapText(true);
-//                    normCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-//                    normCellStyle.setFont(normFont);
-//                    normCellStyle.setFillForegroundColor(exc.getColor());
-//                    normCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-//                    XSSFRow row1 = get(sheet, in.get());
-//                    XSSFCell cell_c1 = get(row1, 1);
-//                    cell_c1.setCellValue(exc.getGiorno());
-//                    cell_c1.setCellStyle(normCellStyle);
-//                    XSSFCell cell_c2 = get(row1, 2);
-//                    cell_c2.setCellValue(exc.getNome());
-//                    cell_c2.setCellStyle(normCellStyle);
-//                    XSSFCell cell_c3 = get(row1, 3);
-//                    cell_c3.setCellValue(exc.getCognome());
-//                    cell_c3.setCellStyle(normCellStyle);
-//                    XSSFCell cell_c4 = get(row1, 4);
-//                    cell_c4.setCellValue(exc.getCf());
-//                    cell_c4.setCellStyle(normCellStyle);
-//                    XSSFCell cell_c5 = get(row1, 5);
-//                    cell_c5.setCellValue(exc.getLogindate());
-//                    cell_c5.setCellStyle(normCellStyle);
-//                    XSSFCell cell_c6 = get(row1, 6);
-//                    cell_c6.setCellValue(exc.getLogoutdate());
-//                    cell_c6.setCellStyle(normCellStyle);
-//                    XSSFCell cell_c7 = get(row1, 7);
-//                    cell_c7.setCellValue(exc.getMillisecondtime());
-//                    cell_c7.setCellStyle(normCellStyle);
-//                    in.addAndGet(1);
-//                });
-//
-//                setBordersToMergedCells(sheet);
-//                sheet.autoSizeColumn(1, true);
-//                sheet.autoSizeColumn(2, true);
-//                sheet.autoSizeColumn(3, true);
-//                sheet.autoSizeColumn(4, true);
-//                sheet.autoSizeColumn(5, true);
-//                sheet.autoSizeColumn(6, true);
-//                sheet.autoSizeColumn(7, true);
-//
-//                File out = new File(pathtemp + "Accreditamento docenti_report_FAD.xlsx");
-//                FileOutputStream fileOut = new FileOutputStream(out);
-//                workbook.write(fileOut);
-//                fileOut.close();
-//
-//            }
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        return null;
-//    }
+    public static long getTimeDiff(DateTime start) {
+        try {
+            TimeZone tz1 = TimeZone.getTimeZone("Europe/Rome");
+            TimeZone tz2 = TimeZone.getTimeZone("GMT");
+            TimeZone tz3 = TimeZone.getTimeZone("GMT+1");
+            ZoneId arrivingZone = ZoneId.of("Europe/Rome");
+            ZonedDateTime arrival = java.time.Instant.ofEpochMilli(start.toInstant().getMillis()).atZone(arrivingZone);
+            if (arrivingZone.getRules().isDaylightSavings(arrival.toInstant())) {
+                return tz1.getRawOffset() - tz2.getRawOffset() + tz1.getDSTSavings() - tz2.getDSTSavings();
+            } else {
+                return tz1.getRawOffset() - tz3.getRawOffset() + tz1.getDSTSavings() - tz3.getDSTSavings();
+            }
+        } catch (Exception e) {
+        }
+        return 0L;
+    }
+
     public static File generatereportFAD_multistanza(String idpr, boolean print, boolean professioni) {
         try {
 
