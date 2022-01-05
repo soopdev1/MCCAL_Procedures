@@ -4,13 +4,20 @@
  */
 package test;
 
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import it.refill.engine.Engine;
 import it.refill.reportistica.Database;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -107,58 +114,78 @@ public class update {
 
     public static void main(String[] args) {
 
-        String fileing = "C:\\Users\\Administrator\\Desktop\\da caricare\\Copia di cittadinanza.xlsx";
-
+        String fileing = "C:\\Users\\Administrator\\Desktop\\da caricare\\Elenco-codici-e-denominazioni-al-31_12_2020.csv";
         try {
-            List<Obj1> l1 = new ArrayList<>();
-            try (XSSFWorkbook wb = new XSSFWorkbook(new File(fileing))) {
-                AtomicInteger inizio = new AtomicInteger(4);
-                XSSFRow row = getRow(wb.getSheetAt(0), inizio.get());
-                while (!getCellValue(getCell(row, 0)).equals("")) {
-                    l1.add(new Obj1(getCellValue(getCell(row, 0)).trim(), getCellValue(getCell(row, 1)).trim()));
-                    inizio.addAndGet(1);
-                    row = getRow(wb.getSheetAt(0), inizio.get());
-                }
-            }
-
-            Database db = new Database(false);
-            String select = "SELECT idcomune,istat,nome FROM comuni WHERE cittadinanza=1 AND istat<>000";
-
-            try (Statement st = db.getC().createStatement(); ResultSet rs = st.executeQuery(select)) {
-                while (rs.next()) {
-                    String nome = rs.getString("nome").toLowerCase().trim();
-
-                    Obj1 o1 = l1.stream().filter(n1 -> n1.getNome().toLowerCase().equals(nome)).findAny().orElse(null);
-                    if (o1 != null) {
-                        if (rs.getString("istat").equals(o1.getCodice())) {
-                            System.out.println(nome + " INVARIATO");
-                        } else {
-                            String update = "UPDATE comuni SET istat = '" + o1.getCodice() + "' WHERE idcomune = "
-                                    + rs.getInt("idcomune") + " AND istat = '" + rs.getString("istat") + "' AND cittadinanza=1";
-//                            System.out.println(nome + " - VECCHIO " + rs.getString("istat") + " - NUOVO " + o1.getCodice());
-
-                            try (Statement st2 = db.getC().createStatement()) {
-                                System.out.println(nome + " " + (st2.executeUpdate(update) > 0));
-                            }
-
+            Database db = new Database(true);
+            String line;
+            BufferedReader br = new BufferedReader(new FileReader(fileing));
+            while ((line = br.readLine()) != null) //returns a Boolean value  
+            {
+                String[] employee = line.split(";");    // use comma as separator  
+                if (employee.length > 9) {
+                    if (!employee[9].equals("n.d.") && !employee[9].equals("Codice AT")) {
+                        String upd = "UPDATE comuni SET codicicatastali_altri = '" + employee[9] + "' WHERE cittadinanza = 1 AND istat = '" + employee[5] + "'";
+                        try (Statement st2 = db.getC().createStatement()) {
+                            System.out.println(employee[6] + " " + (st2.executeUpdate(upd) > 0));
                         }
-
-                    } else {
-                        System.out.println(nome + " NON TROVATO");
                     }
-
                 }
             }
-
             db.closeDB();
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
+//        try {
+//            List<Obj1> l1 = new ArrayList<>();
+//            try (XSSFWorkbook wb = new XSSFWorkbook(new File(fileing))) {
+//                AtomicInteger inizio = new AtomicInteger(4);
+//                XSSFRow row = getRow(wb.getSheetAt(0), inizio.get());
+//                while (!getCellValue(getCell(row, 0)).equals("")) {
+//                    l1.add(new Obj1(getCellValue(getCell(row, 0)).trim(), getCellValue(getCell(row, 1)).trim()));
+//                    inizio.addAndGet(1);
+//                    row = getRow(wb.getSheetAt(0), inizio.get());
+//                }
+//            }
+//
+//            Database db = new Database(false);
+//            String select = "SELECT idcomune,istat,nome FROM comuni WHERE cittadinanza=1 AND istat<>000";
+//
+//            try (Statement st = db.getC().createStatement(); ResultSet rs = st.executeQuery(select)) {
+//                while (rs.next()) {
+//                    String nome = rs.getString("nome").toLowerCase().trim();
+//
+//                    Obj1 o1 = l1.stream().filter(n1 -> n1.getNome().toLowerCase().equals(nome)).findAny().orElse(null);
+//                    if (o1 != null) {
+//                        if (rs.getString("istat").equals(o1.getCodice())) {
+//                            System.out.println(nome + " INVARIATO");
+//                        } else {
+//                            String update = "UPDATE comuni SET istat = '" + o1.getCodice() + "' WHERE idcomune = "
+//                                    + rs.getInt("idcomune") + " AND istat = '" + rs.getString("istat") + "' AND cittadinanza=1";
+////                            System.out.println(nome + " - VECCHIO " + rs.getString("istat") + " - NUOVO " + o1.getCodice());
+//
+//                            try (Statement st2 = db.getC().createStatement()) {
+//                                System.out.println(nome + " " + (st2.executeUpdate(update) > 0));
+//                            }
+//
+//                        }
+//
+//                    } else {
+//                        System.out.println(nome + " NON TROVATO");
+//                    }
+//
+//                }
+//            }
+//
+//            db.closeDB();
+//
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//        }
 //        Engine.manage(71, false);
 //        Engine.manage(16, true);
     }
+
 }
 
 class Obj1 {
