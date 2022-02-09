@@ -164,25 +164,25 @@ public class Engine {
 
     public static void main(String[] args) {
 
-//        String pro;
+        String pro;
         boolean print = false;
-        boolean professioni = false;
-//        String id;
-//        try {
-//            id = args[0];
-//            pro = args[1];
-//        } catch (Exception e) {
-//            id = null;
-//            pro = "false";
-//        }
+//        boolean professioni = false;
+        String id;
+        try {
+            id = args[0];
+            pro = args[1];
+        } catch (Exception e) {
+            id = null;
+            pro = "false";
+        }
 
-//        boolean professioni = (pro == null) || (pro.equals("true"));
+        boolean professioni = (pro == null) || (pro.equals("true"));
         List<String> out = elenco_progetti(professioni);
-//
-//        if (id != null) {
-//            out.clear();
-//            out.add(id);
-//        }
+
+        if (id != null) {
+            out.clear();
+            out.add(id);
+        }
 
         out.forEach(idpr -> {
             File report_temp = generatereportFAD_multistanza(idpr, print, professioni);

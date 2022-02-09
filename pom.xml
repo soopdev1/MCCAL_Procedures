@@ -147,7 +147,7 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        it.refill.engine.Sms
+                                        it.refill.engine.Engine
                                     </mainClass>
                                 </manifest>
                             </archive>
