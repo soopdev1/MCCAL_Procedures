@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
@@ -26,14 +27,17 @@ public class Database {
 
     public Connection c = null;
 
+    private static final ResourceBundle conf = ResourceBundle.getBundle("conf.conf");
+    
     public Database(boolean professioni) {
 
+        String user = conf.getString("db.user");
+        String password = conf.getString("db.pass");
+        
         /*NUOVO MC NAZIONALE*/
-        String user = "admin";
-        String password = "Xray8888$$!";
-        String host = "clustermicrocredito.cluster-c6m6yfqeypv3.eu-south-1.rds.amazonaws.com:3306/microcredito";//MICROCREDITO
+        String host = conf.getString("db.host") + ":3306/microcredito";//MICROCREDITO
         if (professioni) {
-            host = "clustermicrocredito.cluster-c6m6yfqeypv3.eu-south-1.rds.amazonaws.com:3306/professioni";//PROFESSIONI
+            host = conf.getString("db.host") + ":3306/professioni";//PROFESSIONI
         }
 
         try {
@@ -86,11 +90,12 @@ public class Database {
     public boolean updatePath(String id, String url) {
         try {
             String upd = "UPDATE path SET url = ? WHERE id = ? ";
-            PreparedStatement ps = this.c.prepareStatement(upd);
-            ps.setString(1, url);
-            ps.setString(2, id);
-            boolean ok = ps.executeUpdate() > 0;
-            ps.close();
+            boolean ok;
+            try (PreparedStatement ps = this.c.prepareStatement(upd)) {
+                ps.setString(1, url);
+                ps.setString(2, id);
+                ok = ps.executeUpdate() > 0;
+            }
             return ok;
         } catch (SQLException ex) {
             System.err.println("METHOD: " + new Object() {
@@ -172,18 +177,19 @@ public class Database {
             Statement st = this.c.createStatement();
             ResultSet rs = st.executeQuery(sql);
             if (rs.next()) {
-                Statement st1 = this.c.createStatement();
-                String update = "UPDATE fad_report SET base64 = '" + re.getBase64() + "' WHERE idprogetti_formativi = " + re.getIdpr();
-                int x = st1.executeUpdate(update);
-                st1.close();
+                int x;
+                try (Statement st1 = this.c.createStatement()) {
+                    String update = "UPDATE fad_report SET base64 = '" + re.getBase64() + "' WHERE idprogetti_formativi = " + re.getIdpr();
+                    x = st1.executeUpdate(update);
+                }
                 rs.close();
                 st.close();
                 return x > 0;
             } else {
-                Statement st1 = this.c.createStatement();
-                String insert = "INSERT INTO fad_report VALUES (" + re.getIdpr() + ",'" + re.getBase64() + "','Y')";
-                st1.execute(insert);
-                st1.close();
+                try (Statement st1 = this.c.createStatement()) {
+                    String insert = "INSERT INTO fad_report VALUES (" + re.getIdpr() + ",'" + re.getBase64() + "','Y')";
+                    st1.execute(insert);
+                }
                 rs.close();
                 st.close();
                 return true;
@@ -203,25 +209,21 @@ public class Database {
         List<Report> out = new ArrayList<>();
         try {
             String sql1 = "SELECT DISTINCT(f.idprogetti_formativi) FROM fad_calendar f";
-            Statement st1 = this.c.createStatement();
-            ResultSet rs1 = st1.executeQuery(sql1);
-            while (rs1.next()) {
-                int idpr = rs1.getInt(1);
-                String sql2 = "SELECT f.definitivo FROM fad_report f WHERE f.idprogetti_formativi = " + idpr;
-                Statement st2 = this.c.createStatement();
-                ResultSet rs2 = st2.executeQuery(sql2);
-                if (rs2.next()) {
-                    if (rs2.getString(1).equals("N")) {
-                        out.add(new Report(idpr, true));
+            try (Statement st1 = this.c.createStatement(); ResultSet rs1 = st1.executeQuery(sql1)) {
+                while (rs1.next()) {
+                    int idpr = rs1.getInt(1);
+                    String sql2 = "SELECT f.definitivo FROM fad_report f WHERE f.idprogetti_formativi = " + idpr;
+                    try (Statement st2 = this.c.createStatement(); ResultSet rs2 = st2.executeQuery(sql2)) {
+                        if (rs2.next()) {
+                            if (rs2.getString(1).equals("N")) {
+                                out.add(new Report(idpr, true));
+                            }
+                        } else {
+                            out.add(new Report(idpr, false));
+                        }
                     }
-                } else {
-                    out.add(new Report(idpr, false));
                 }
-                rs2.close();
-                st2.close();
             }
-            rs1.close();
-            st1.close();
         } catch (SQLException ex) {
             System.err.println("METHOD: " + new Object() {
             }
@@ -237,13 +239,11 @@ public class Database {
         List<String> out = new ArrayList<>();
         try {
             String sql = "SELECT partecipanti FROM fad_micro WHERE idfad = " + nomestanza;
-            Statement st = this.c.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            if (rs.next()) {
-                out = Arrays.asList(new Gson().fromJson(rs.getString(1).toUpperCase().trim(), String[].class));
+            try (Statement st = this.c.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+                if (rs.next()) {
+                    out = Arrays.asList(new Gson().fromJson(rs.getString(1).toUpperCase().trim(), String[].class));
+                }
             }
-            rs.close();
-            st.close();
         } catch (SQLException ex) {
             out = new ArrayList<>();
             System.err.println("METHOD: " + new Object() {

@@ -5,7 +5,7 @@
  */
 package it.refill.engine;
 
-import it.refill.reportistica.ExcelExtraction;
+//import it.refill.reportistica.ExcelExtraction;
 
 /**
  *
@@ -13,10 +13,10 @@ import it.refill.reportistica.ExcelExtraction;
  */
 public class CreateReport {
 
-    public static void main(String[] args) {
-        //VECCHIO ExcelExtraction.excelAllieviFormati();		
-        //VECCHIO ExcelExtraction.excelAllievi();        
-        ExcelExtraction.elencoAllievi_R();
-        ExcelExtraction.elencoDocenti_R();
-    }
+//    public static void main(String[] args) {
+//        //VECCHIO ExcelExtraction.excelAllieviFormati();		
+//        //VECCHIO ExcelExtraction.excelAllievi();        
+//        ExcelExtraction.elencoAllievi_R();
+//        ExcelExtraction.elencoDocenti_R();
+//    }
 }

@@ -24,11 +24,12 @@
     <properties>
       <property name="eclipselink.logging.level" value="OFF"/>
       <property name="javax.persistence.schema-generation.database.action" value="validate"/>
-      <property name="javax.persistence.jdbc.user" value="admin"/>
+      <property name="javax.persistence.jdbc.user" value="bando"/>
       <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
-      <property name="javax.persistence.jdbc.password" value="Xray8888$$!"/>
+      <property name="javax.persistence.jdbc.password" value="bando"/>
       <!-- MC 
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://clustermicrocredito.cluster-c6m6yfqeypv3.eu-south-1.rds.amazonaws.com:3306/microcredito?useSSL=false"/>
+      <property name="javax.persistence.jdbc.url" value="jdbc:mysql://172.27.2.66:3306/microcredito?useSSL=false"/>
       -->
       <!-- PROFESSIONI -->
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://clustermicrocredito.cluster-c6m6yfqeypv3.eu-south-1.rds.amazonaws.com:3306/professioni?useSSL=false"/>

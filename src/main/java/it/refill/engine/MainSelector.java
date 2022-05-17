@@ -22,19 +22,27 @@ public class MainSelector {
 
     public static void main(String[] args) {
 
+        String id;
+        String pro;
         int select_action;
         try {
             select_action = Integer.parseInt(args[0].trim());
+            pro = args[1];
+            id = args[2];
         } catch (Exception e) {
             select_action = 0;
+            id = null;
+            pro = "false";
         }
 
         boolean print = false;
-        boolean professioni = false;
+        boolean professioni = (pro == null) || (pro.equals("true"));
+
         //ARGS[0] OPERAZIONE 1 - 3
         //1 - GESTIONE - REPORTISTICA
         //2 - GESTIONE - FAD
         //3 - GESTIONE - SMS
+        //4 - GESTIONE - REPORT ON DEMAND
         switch (select_action) {
             case 1:
                 ExcelExtraction.elencoAllievi_R();
@@ -48,16 +56,16 @@ public class MainSelector {
                         try {
                             String sql1 = "SELECT iddocumenti_progetti FROM documenti_progetti WHERE idprogetto = " + idpr + " AND tipo = 30";
                             Database db2 = new Database(professioni);
-                            try (Statement st = db2.getC().createStatement(); ResultSet rs = st.executeQuery(sql1)) {
+                            try ( Statement st = db2.getC().createStatement();  ResultSet rs = st.executeQuery(sql1)) {
                                 if (rs.next()) {
                                     int iddoc = rs.getInt(1);
                                     String update1 = "UPDATE documenti_progetti SET path = '" + report_temp.getPath().replace("\\", "/") + "' WHERE iddocumenti_progetti=" + iddoc;
-                                    try (Statement st1 = db2.getC().createStatement()) {
+                                    try ( Statement st1 = db2.getC().createStatement()) {
                                         st1.executeUpdate(update1);
                                     }
                                 } else {
                                     String insert1 = "INSERT INTO documenti_progetti (deleted,path,idprogetto,tipo) VALUES (0,'" + report_temp.getPath().replace("\\", "/") + "'," + idpr + ",30)";
-                                    try (Statement st1 = db2.getC().createStatement()) {
+                                    try ( Statement st1 = db2.getC().createStatement()) {
                                         st1.execute(insert1);
                                     }
                                 }
@@ -72,6 +80,39 @@ public class MainSelector {
                 break;
             case 3:
                 sms_primogiorno(professioni);
+                break;
+            case 4:
+                List<String> out2 = elenco_progetti(professioni);
+                if (id != null) {
+                    out2.clear();
+                    out2.add(id);
+                }
+                out2.forEach(idpr -> {
+                    File report_temp = generatereportFAD_multistanza(idpr, print, professioni);
+                    if (report_temp != null) {
+                        try {
+                            String sql1 = "SELECT iddocumenti_progetti FROM documenti_progetti WHERE idprogetto = " + idpr + " AND tipo = 30";
+                            Database db2 = new Database(professioni);
+                            try ( Statement st = db2.getC().createStatement();  ResultSet rs = st.executeQuery(sql1)) {
+                                if (rs.next()) {
+                                    int iddoc = rs.getInt(1);
+                                    String update1 = "UPDATE documenti_progetti SET path = '" + report_temp.getPath().replace("\\", "/") + "' WHERE iddocumenti_progetti=" + iddoc;
+                                    try ( Statement st1 = db2.getC().createStatement()) {
+                                        st1.executeUpdate(update1);
+                                    }
+                                } else {
+                                    String insert1 = "INSERT INTO documenti_progetti (deleted,path,idprogetto,tipo) VALUES (0,'" + report_temp.getPath().replace("\\", "/") + "'," + idpr + ",30)";
+                                    try ( Statement st1 = db2.getC().createStatement()) {
+                                        st1.execute(insert1);
+                                    }
+                                }
+                            }
+                            db2.closeDB();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
                 break;
             default:
                 break;

@@ -52,14 +52,13 @@ public class Sms {
     }
     
     
-    public static void main(String[] args) {
-        boolean professioni;
-        try {
-            professioni = Boolean.valueOf(args[0].trim());
-        } catch (Exception e) {
-            professioni = false;
-        }
-        
-        sms_primogiorno(professioni);
-    }
+//    public static void main(String[] args) {
+//        boolean professioni;
+//        try {
+//            professioni = Boolean.valueOf(args[0].trim());
+//        } catch (Exception e) {
+//            professioni = false;
+//        }        
+//        sms_primogiorno(professioni);
+//    }
 }
