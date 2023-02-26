@@ -13,6 +13,7 @@ import java.io.File;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
+import rc.so.accreditamento.Accreditamento;
 
 /**
  *
@@ -43,6 +44,7 @@ public class MainSelector {
         //2 - GESTIONE - FAD
         //3 - GESTIONE - SMS
         //4 - GESTIONE - REPORT ON DEMAND
+        //5 - ACCREDITAMENTO - DOMANDE
         switch (select_action) {
             case 1:
                 ExcelExtraction.elencoAllievi_R();
@@ -113,6 +115,9 @@ public class MainSelector {
                         }
                     }
                 });
+                break;
+            case 5:
+                Accreditamento.engine();
                 break;
             default:
                 break;

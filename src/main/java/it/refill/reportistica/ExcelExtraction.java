@@ -150,7 +150,7 @@ public class ExcelExtraction {
         try {
             File out_file = new File(path);
             Workbook workbook;
-            try (FileInputStream inputStream = new FileInputStream(out_file)) {
+            try ( FileInputStream inputStream = new FileInputStream(out_file)) {
                 workbook = WorkbookFactory.create(inputStream);
                 Sheet sheet = workbook.getSheetAt(0);
                 CreationHelper createHelper = workbook.getCreationHelper();
@@ -181,7 +181,7 @@ public class ExcelExtraction {
                     setSizeCell(sheet, row);
                 }
             }
-            try (FileOutputStream out = new FileOutputStream(out_file)) {
+            try ( FileOutputStream out = new FileOutputStream(out_file)) {
                 workbook.write(out);
                 workbook.close();
                 out.flush();
@@ -268,7 +268,7 @@ public class ExcelExtraction {
 
             List<Docenti> docenti = e.getDocenti();
 
-            try (XSSFWorkbook wb = new XSSFWorkbook()) {
+            try ( XSSFWorkbook wb = new XSSFWorkbook()) {
                 XSSFSheet sh1 = wb.createSheet();
 
                 XSSFColor color = new XSSFColor(new java.awt.Color(43, 150, 150), null);
@@ -353,7 +353,7 @@ public class ExcelExtraction {
                     sh1.autoSizeColumn(i);
                 }
                 String fileout = e.getPath("estrazione_docenti");
-                try (FileOutputStream outputStream = new FileOutputStream(new File(fileout))) {
+                try ( FileOutputStream outputStream = new FileOutputStream(new File(fileout))) {
                     wb.write(outputStream);
                 }
             }
@@ -475,7 +475,7 @@ public class ExcelExtraction {
                 String base64IN = e.getPath("TEMPLATE_ALLIEVI");
                 //File ing = new File(pathIN);
                 // String fileout = e.getPath("estrazione_allievi");
-                try (XSSFWorkbook wb = new XSSFWorkbook(new ByteArrayInputStream(Base64.decodeBase64(base64IN)))) {
+                try ( XSSFWorkbook wb = new XSSFWorkbook(new ByteArrayInputStream(Base64.decodeBase64(base64IN)))) {
                     XSSFSheet sh1 = wb.getSheetAt(0);
                     AtomicInteger indice = new AtomicInteger(1);
 
@@ -511,7 +511,7 @@ public class ExcelExtraction {
                         sh1.autoSizeColumn(i);
                     }
                     String fileout = e.getPath("estrazione_allievi");
-                    try (FileOutputStream outputStream = new FileOutputStream(new File(fileout))) {
+                    try ( FileOutputStream outputStream = new FileOutputStream(new File(fileout))) {
                         wb.write(outputStream);
                     }
                     System.out.println(fileout);
@@ -612,7 +612,9 @@ public class ExcelExtraction {
         return false;
     }
 
-//    public static void main(String[] args) {
+    public static void main(String[] args) {
+        ExcelExtraction.elencoAllievi_R();
+
 //        salvatemplate(new File("F:\\MCAL\\ESTRAZIONI BASE\\TEMPLATE_ALLIEVI.xlsx"), "TEMPLATE_ALLIEVI");
-//    }
+    }
 }
