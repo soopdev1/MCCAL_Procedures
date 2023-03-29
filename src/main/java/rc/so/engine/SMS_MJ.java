@@ -7,6 +7,7 @@ import com.mailjet.client.MailjetRequest;
 import com.mailjet.client.MailjetResponse;
 import com.mailjet.client.resource.sms.SmsSend;
 import java.util.logging.Level;
+import org.apache.commons.lang3.StringUtils;
 import static rc.so.engine.MainSelector.conf;
 import static rc.so.engine.MainSelector.estraiEccezione;
 import static rc.so.engine.MainSelector.log;
@@ -23,7 +24,7 @@ public class SMS_MJ {
             MailjetClient client = new MailjetClient(options);
             MailjetRequest request = new MailjetRequest(SmsSend.resource)
                     .property(SmsSend.FROM, conf.getString("mj.sms.name"))
-                    .property(SmsSend.TO, "+39" + cell)
+                    .property(SmsSend.TO, "+39" + StringUtils.replace(cell, "+39", ""))
                     .property(SmsSend.TEXT, msg);
             MailjetResponse response = client.post(request);
             if (response.getStatus() == 200) {
