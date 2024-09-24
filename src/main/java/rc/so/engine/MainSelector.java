@@ -24,6 +24,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.joda.time.DateTime;
+import static rc.so.engine.SMS_SINCH.sendSMS2024;
 import static rc.so.reportistica.ExcelFAD.generatereportFAD_multistanza;
 import rc.so.reportistica.Report;
 
@@ -43,7 +44,7 @@ public class MainSelector {
         try {
             select_action = Integer.parseInt(args[0].trim());
         } catch (Exception e) {
-            select_action = 0;
+            select_action = 1;
         }
 
         try {
@@ -283,7 +284,7 @@ public class MainSelector {
                                 String nome = rs1.getString("nome").toUpperCase();
                                 String cell = rs1.getString("telefono").toUpperCase();
                                 String msg = "Ciao " + nome + " ti ricordiamo che oggi ci sarà la prima lezione del tuo PF, dalle " + orainizio + " alle " + orafine + ". Controlla la tua mail.";
-                                boolean es = SMS_MJ.sendSMS2022(cell, msg);
+                                boolean es = sendSMS2024(cell, msg);
                                 if (es) {
                                     log.log(Level.WARNING, "SMS INVIATO AD ID {0}", idpr);
                                 } else {

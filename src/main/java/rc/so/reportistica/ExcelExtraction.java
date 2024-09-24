@@ -361,6 +361,7 @@ public class ExcelExtraction {
             }
 
         } catch (Exception ex) {
+            ex.printStackTrace();
             e.insertTracking(null, "BATCH elencoAllievi: " + estraiEccezione(ex));
         } finally {
             e.close();
